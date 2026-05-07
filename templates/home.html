@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}TOT Research Platform — Triaxial Orientation Theory{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">Psychometric Research Platform</div>
+    <h1 class="hero-title">Where do you stand<br>inside experience?</h1>
+    <p class="hero-sub">
+      Triaxial Orientation Theory maps your position within three fundamental axes of conscious experience —
+      Depth, Breath, and Obligation — using real geometric mathematics, not personality boxes.
+    </p>
+    <a href="/assess/start" class="btn btn-primary btn-lg">Begin Assessment <span class="btn-arrow">→</span></a>
+    <p class="hero-meta">66 items · 8–12 minutes · Full geometric profile</p>
+  </div>
+  <div class="hero-orb" aria-hidden="true"></div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Three axes. One position.</h2>
+    <p class="section-sub">Every person is always oriented along three simultaneous axes of experience.</p>
+    <div class="axes-grid">
+      <div class="axis-card">
+        <div class="axis-icon axis-v">V</div>
+        <h3>Depth</h3>
+        <p class="axis-poles"><span class="pole-tag">Ohn</span> ←→ <span class="pole-tag">Hoc</span></p>
+        <p>Are you oriented toward what lies beneath the surface of everyday experience, or toward the immediate, practical, and concrete?</p>
+      </div>
+      <div class="axis-card">
+        <div class="axis-icon axis-h">H</div>
+        <h3>Breath</h3>
+        <p class="axis-poles"><span class="pole-tag">Him</span> ←→ <span class="pole-tag">Allmen</span></p>
+        <p>Do you tend toward self-contained independence and singular perspective, or toward genuine connection with the collective?</p>
+      </div>
+      <div class="axis-card">
+        <div class="axis-icon axis-t">T</div>
+        <h3>Obligation</h3>
+        <p class="axis-poles"><span class="pole-tag">Wasonce</span> ←→ <span class="pole-tag">Willbe</span></p>
+        <p>Do you feel the pull of ancestral inheritance and the weight of the past, or obligation toward the unborn and the future?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-dark">
+  <div class="container">
+    <h2 class="section-title">What you receive</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⬡</div>
+        <h3>Zone Classification</h3>
+        <p>Placement within one of 8 octahedral zones, with one of 24 specific subtypes and a confidence score.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">◈</div>
+        <h3>Shape Parameter</h3>
+        <p>Your personal Lp norm — the mathematical shape of your octahedral space, from compressed to expanded.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⊕</div>
+        <h3>Capture Analysis</h3>
+        <p>Detection of vertex, edge, or face captures — positions where orientation has become fixed or rigid.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⟁</div>
+        <h3>Stamp Detection</h3>
+        <p>Five intergenerational deformation patterns — inherited geometric signatures from previous generations.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">△</div>
+        <h3>3D Visualization</h3>
+        <p>Your position rendered inside an interactive octahedral space — the geometry of your conscious experience.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">↓</div>
+        <h3>PDF Report</h3>
+        <p>A full written profile with all scores, classifications, and geometric measurements — yours to keep.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Eight zones of orientation</h2>
+    <p class="section-sub">Your responses place you inside one of eight zones within the octahedral interior.</p>
+    <div class="zones-grid">
+      {% set zones = [
+        ("I",   "The Performer",    "Surface · Singular · Future",     "#5eead4"),
+        ("II",  "The Crowd",        "Surface · Collective · Future",   "#38bdf8"),
+        ("III", "The Mystic",       "Depth · Singular · Future",       "#a78bfa"),
+        ("IV",  "The Congregation", "Depth · Collective · Future",     "#fb7185"),
+        ("V",   "The Archivist",    "Surface · Singular · Past",       "#34d399"),
+        ("VI",  "The Tradition",    "Depth · Collective · Past",       "#fbbf24"),
+        ("VII", "The Prophet",      "Depth · Singular · Past",         "#f97316"),
+        ("VIII","The Somey",        "Surface · Collective · Past",     "#e879f9"),
+      ] %}
+      {% for num, name, desc, color in zones %}
+      <div class="zone-card" style="--zone-color: {{ color }}">
+        <span class="zone-num">{{ num }}</span>
+        <strong>{{ name }}</strong>
+        <span class="zone-desc">{{ desc }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section cta-section">
+  <div class="container cta-inner">
+    <h2>Ready to find your position?</h2>
+    <p>The assessment takes 8–12 minutes. No account required. Your full profile is available immediately.</p>
+    <a href="/assess/start" class="btn btn-primary btn-lg">Begin Assessment <span class="btn-arrow">→</span></a>
+  </div>
+</section>
+{% endblock %}

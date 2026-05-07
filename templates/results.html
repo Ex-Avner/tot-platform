@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+{% block title %}Your TOT Profile{% endblock %}
+
+{% block head %}
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="results-wrap">
+
+  <div class="results-header">
+    <div class="results-badge">Your Orientation Profile</div>
+    <h1 class="results-zone">{{ profile.zone }}</h1>
+    <p class="results-subtype">{{ profile.primary_subtype }}</p>
+    <p class="results-subtype-desc">{{ profile.subtype_description }}</p>
+    <div class="results-actions">
+      <a href="/results/{{ session_id }}/pdf" class="btn btn-primary">Download PDF Report</a>
+      <a href="/assess/start" class="btn btn-ghost">Retake Assessment</a>
+    </div>
+  </div>
+
+  <!-- 3D Octahedron -->
+  <section class="results-section">
+    <h2>Your Position in Octahedral Space</h2>
+    <p class="results-section-sub">The six poles form the vertices of an octahedron. Your orientation is the point inside.</p>
+    <div id="octahedron-plot" class="octahedron-container"></div>
+  </section>
+
+  <!-- Axis Scores -->
+  <section class="results-section">
+    <h2>Axis Orientation</h2>
+    <div class="axis-scores-grid">
+
+      <div class="axis-score-card">
+        <div class="axis-score-label">Vertical · Depth</div>
+        <div class="axis-score-bar-wrap">
+          <span class="axis-pole-left">Ohn</span>
+          <div class="axis-score-bar">
+            <div class="axis-score-fill"
+              style="left: 50%; width: {{ (profile.axis_scores.vertical | abs * 50) | round }}%;
+                     {% if profile.axis_scores.vertical < 0 %}transform: translateX(-100%); background: var(--accent);{% else %}background: var(--accent-alt);{% endif %}">
+            </div>
+            <div class="axis-score-center"></div>
+          </div>
+          <span class="axis-pole-right">Hoc</span>
+        </div>
+        <div class="axis-score-value">{{ "%+.3f" | format(profile.axis_scores.vertical) }}</div>
+      </div>
+
+      <div class="axis-score-card">
+        <div class="axis-score-label">Horizontal · Breath</div>
+        <div class="axis-score-bar-wrap">
+          <span class="axis-pole-left">Him</span>
+          <div class="axis-score-bar">
+            <div class="axis-score-fill"
+              style="left: 50%; width: {{ (profile.axis_scores.horizontal | abs * 50) | round }}%;
+                     {% if profile.axis_scores.horizontal < 0 %}transform: translateX(-100%); background: var(--accent);{% else %}background: var(--accent-alt);{% endif %}">
+            </div>
+            <div class="axis-score-center"></div>
+          </div>
+          <span class="axis-pole-right">Allmen</span>
+        </div>
+        <div class="axis-score-value">{{ "%+.3f" | format(profile.axis_scores.horizontal) }}</div>
+      </div>
+
+      <div class="axis-score-card">
+        <div class="axis-score-label">Temporal · Obligation</div>
+        <div class="axis-score-bar-wrap">
+          <span class="axis-pole-left">Wasonce</span>
+          <div class="axis-score-bar">
+            <div class="axis-score-fill"
+              style="left: 50%; width: {{ (profile.axis_scores.temporal_balance | abs * 50) | round }}%;
+                     {% if profile.axis_scores.temporal_balance < 0 %}transform: translateX(-100%); background: var(--accent);{% else %}background: var(--accent-alt);{% endif %}">
+            </div>
+            <div class="axis-score-center"></div>
+          </div>
+          <span class="axis-pole-right">Willbe</span>
+        </div>
+        <div class="axis-score-value">{{ "%+.3f" | format(profile.axis_scores.temporal_balance) }}</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Pole Scores -->
+  <section class="results-section">
+    <h2>Pole Scores</h2>
+    <p class="results-section-sub">Raw normalized score per pole (0 = minimum orientation, 1 = maximum).</p>
+    <div class="pole-scores-grid">
+      {% for pole, score in profile.pole_scores.items() %}
+      <div class="pole-score-card">
+        <div class="pole-score-name">{{ pole }}</div>
+        <div class="pole-bar-wrap">
+          <div class="pole-bar">
+            <div class="pole-bar-fill" style="width: {{ (score * 100) | round }}%"></div>
+          </div>
+          <span class="pole-score-val">{{ "%.3f" | format(score) }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Shape & Geometry -->
+  <section class="results-section">
+    <h2>Geometric Profile</h2>
+    <div class="geo-grid">
+      <div class="geo-card geo-highlight">
+        <div class="geo-val">{{ "%.3f" | format(profile.shape_parameter) }}</div>
+        <div class="geo-key">Shape Parameter (p)</div>
+        <div class="geo-sub">{{ profile.shape_name }}</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-val">{{ "%.4f" | format(profile.interior_volume) }}</div>
+        <div class="geo-key">Interior Volume</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-val">{{ "%.4f" | format(profile.distance_from_center) }}</div>
+        <div class="geo-key">Distance from Center</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-val">{{ "%.4f" | format(profile.distance_from_boundary) }}</div>
+        <div class="geo-key">Distance from Boundary</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-val">{{ profile.geometry.weakest_axis }}</div>
+        <div class="geo-key">Weakest Axis</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-val">{{ profile.geometry.strongest_axis }}</div>
+        <div class="geo-key">Strongest Axis</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-val">{{ "%.3f" | format(profile.geometry.axis_imbalance) }}</div>
+        <div class="geo-key">Axis Imbalance</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-val">{{ "%d" | format(profile.zone_confidence * 100) }}%</div>
+        <div class="geo-key">Zone Confidence</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Capture Analysis -->
+  <section class="results-section">
+    <h2>Capture Analysis</h2>
+    <p class="results-section-sub">A capture occurs when orientation has become fixed toward a particular pole, edge, or face.</p>
+    <div class="capture-card {% if profile.capture_type == 'No Capture' %}capture-none{% else %}capture-active{% endif %}">
+      <div class="capture-type">{{ profile.capture_type }}</div>
+      {% if profile.capture_primary %}
+      <div class="capture-primary">Primary: {{ profile.capture_primary }}</div>
+      {% endif %}
+      <div class="capture-intensity">Intensity: {{ "%.3f" | format(profile.capture_intensity) }}</div>
+    </div>
+  </section>
+
+  <!-- Stamp Analysis -->
+  <section class="results-section">
+    <h2>Intergenerational Stamp Analysis</h2>
+    <p class="results-section-sub">Stamps are inherited geometric deformations — patterns from previous generations that shape your octahedral space.</p>
+    <div class="stamp-primary {% if profile.primary_stamp == 'None' %}stamp-none{% endif %}">
+      Primary Stamp: <strong>{{ profile.primary_stamp }}</strong>
+    </div>
+    {% if profile.stamp_scores %}
+    <div class="stamp-scores-grid">
+      {% for stamp, score in profile.stamp_scores.items() %}
+      <div class="stamp-card">
+        <div class="stamp-name">{{ stamp }}</div>
+        <div class="stamp-bar-wrap">
+          <div class="stamp-bar">
+            <div class="stamp-bar-fill" style="width: {{ (score * 100) | round }}%"></div>
+          </div>
+          <span class="stamp-val">{{ "%.3f" | format(score) }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+
+  <div class="results-footer-actions">
+    <a href="/results/{{ session_id }}/pdf" class="btn btn-primary btn-lg">Download Full PDF Report</a>
+    <a href="/assess/start" class="btn btn-ghost">Take Assessment Again</a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const profile = {{ profile_json | safe }};
+
+(function buildOctahedron() {
+  const V = {
+    OHN:     [0, 0, -1],
+    HOC:     [0, 0,  1],
+    HIM:     [-1, 0, 0],
+    ALLMEN:  [ 1, 0, 0],
+    WASONCE: [0, -1, 0],
+    WILLBE:  [0,  1, 0],
+  };
+
+  const faces = [
+    [V.HOC, V.HIM,    V.WASONCE],
+    [V.HOC, V.ALLMEN, V.WASONCE],
+    [V.HOC, V.HIM,    V.WILLBE],
+    [V.HOC, V.ALLMEN, V.WILLBE],
+    [V.OHN, V.HIM,    V.WASONCE],
+    [V.OHN, V.ALLMEN, V.WASONCE],
+    [V.OHN, V.HIM,    V.WILLBE],
+    [V.OHN, V.ALLMEN, V.WILLBE],
+  ];
+
+  const meshX = [], meshY = [], meshZ = [];
+  const iArr = [], jArr = [], kArr = [];
+  let idx = 0;
+  faces.forEach(([a, b, c]) => {
+    meshX.push(a[0], b[0], c[0]);
+    meshY.push(a[1], b[1], c[1]);
+    meshZ.push(a[2], b[2], c[2]);
+    iArr.push(idx); jArr.push(idx+1); kArr.push(idx+2);
+    idx += 3;
+  });
+
+  const mesh = {
+    type: 'mesh3d',
+    x: meshX, y: meshY, z: meshZ,
+    i: iArr, j: jArr, k: kArr,
+    opacity: 0.08,
+    color: '#5eead4',
+    hoverinfo: 'skip',
+  };
+
+  // Wireframe edges
+  const edges = [
+    [V.HOC, V.HIM], [V.HOC, V.ALLMEN], [V.HOC, V.WASONCE], [V.HOC, V.WILLBE],
+    [V.OHN, V.HIM], [V.OHN, V.ALLMEN], [V.OHN, V.WASONCE], [V.OHN, V.WILLBE],
+    [V.HIM, V.WASONCE], [V.HIM, V.WILLBE],
+    [V.ALLMEN, V.WASONCE], [V.ALLMEN, V.WILLBE],
+  ];
+  const wireX = [], wireY = [], wireZ = [];
+  edges.forEach(([a, b]) => {
+    wireX.push(a[0], b[0], null);
+    wireY.push(a[1], b[1], null);
+    wireZ.push(a[2], b[2], null);
+  });
+  const wire = {
+    type: 'scatter3d', mode: 'lines',
+    x: wireX, y: wireY, z: wireZ,
+    line: { color: '#5eead4', width: 1.5 },
+    hoverinfo: 'skip',
+  };
+
+  // Vertex labels
+  const labels = Object.entries(V);
+  const verts = {
+    type: 'scatter3d', mode: 'markers+text',
+    x: labels.map(([,v]) => v[0]),
+    y: labels.map(([,v]) => v[1]),
+    z: labels.map(([,v]) => v[2]),
+    text: labels.map(([n]) => n),
+    textposition: 'top center',
+    textfont: { color: '#9fb0c5', size: 11, family: 'Space Grotesk' },
+    marker: { size: 5, color: '#38bdf8' },
+    hoverinfo: 'text',
+  };
+
+  // User position
+  const axes = profile.axis_scores;
+  const ux = axes.horizontal || 0;
+  const uy = axes.temporal_balance || 0;
+  const uz = axes.vertical || 0;
+
+  const userPt = {
+    type: 'scatter3d', mode: 'markers+text',
+    x: [ux], y: [uy], z: [uz],
+    text: ['You'],
+    textposition: 'top center',
+    textfont: { color: '#ffffff', size: 13, family: 'Space Grotesk' },
+    marker: { size: 10, color: '#ef4444', symbol: 'diamond' },
+    hovertemplate: `<b>Your Position</b><br>H: ${ux.toFixed(3)}<br>T: ${uy.toFixed(3)}<br>V: ${uz.toFixed(3)}<extra></extra>`,
+  };
+
+  // Axis lines through user position
+  const axisLines = {
+    type: 'scatter3d', mode: 'lines',
+    x: [ux, ux, null, ux, ux, null, ux, ux],
+    y: [uy, uy, null, -1,  1, null, uy, uy],
+    z: [-1,  1, null, uz, uz, null, uz, uz],
+    line: { color: '#ef4444', width: 1, dash: 'dot' },
+    hoverinfo: 'skip',
+  };
+
+  const layout = {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor:  'rgba(0,0,0,0)',
+    margin: { l: 0, r: 0, t: 0, b: 0 },
+    scene: {
+      bgcolor: 'rgba(11,16,33,0)',
+      xaxis: { title: 'Breath (H)', color: '#9fb0c5', gridcolor: '#1e2a42', zerolinecolor: '#1e2a42' },
+      yaxis: { title: 'Obligation (T)', color: '#9fb0c5', gridcolor: '#1e2a42', zerolinecolor: '#1e2a42' },
+      zaxis: { title: 'Depth (V)', color: '#9fb0c5', gridcolor: '#1e2a42', zerolinecolor: '#1e2a42' },
+      camera: { eye: { x: 1.6, y: 1.2, z: 0.8 } },
+    },
+    showlegend: false,
+  };
+
+  Plotly.newPlot('octahedron-plot', [mesh, wire, verts, userPt, axisLines], layout, {
+    responsive: true,
+    displayModeBar: false,
+  });
+})();
+</script>
+{% endblock %}

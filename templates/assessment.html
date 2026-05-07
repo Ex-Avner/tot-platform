@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Assessment · Section {{ section_num }} of {{ total_sections }}{% endblock %}
+
+{% block content %}
+<div class="assess-wrap">
+
+  <!-- Progress bar -->
+  <div class="assess-progress-bar">
+    <div class="assess-progress-fill" style="width: {{ progress }}%"></div>
+  </div>
+
+  <div class="assess-header">
+    <div class="assess-step">Section {{ section_num }} of {{ total_sections }}</div>
+    <h1 class="assess-title">{{ section.title }}</h1>
+    <p class="assess-subtitle">{{ section.subtitle }}</p>
+  </div>
+
+  <form method="post" action="/assess/{{ session_id }}/{{ section_num }}/save" id="assess-form">
+
+    <div class="items-list">
+      {% for item in section.questions %}
+      <div class="item-card {% if existing_responses.get(item.id) %}item-answered{% endif %}" id="item-{{ item.id }}">
+        <div class="item-text">
+          <span class="item-id">{{ item.id }}</span>
+          {{ item.text }}
+        </div>
+        <div class="likert-scale" role="group" aria-label="Rating for item {{ item.id }}">
+          <span class="likert-label-left">Strongly<br>Disagree</span>
+          {% for val in range(1, 8) %}
+          <label class="likert-opt">
+            <input
+              type="radio"
+              name="{{ item.id }}"
+              value="{{ val }}"
+              required
+              {% if existing_responses.get(item.id) == val %}checked{% endif %}
+              onchange="markAnswered('{{ item.id }}')"
+            />
+            <span class="likert-btn">{{ val }}</span>
+          </label>
+          {% endfor %}
+          <span class="likert-label-right">Strongly<br>Agree</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="assess-footer">
+      {% if section_num > 1 %}
+      <a href="/assess/{{ session_id }}/{{ section_num - 1 }}" class="btn btn-ghost">← Back</a>
+      {% else %}
+      <div></div>
+      {% endif %}
+
+      <div class="assess-answered-count">
+        <span id="answered-count">{{ existing_responses | length }}</span> / 66 answered
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="next-btn">
+        {% if is_last %}Compute My Profile{% else %}Next Section →{% endif %}
+      </button>
+    </div>
+
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const answered = new Set({{ existing_responses.keys() | list | tojson }});
+  const sectionItems = {{ section.questions | map(attribute='id') | list | tojson }};
+
+  function markAnswered(itemId) {
+    answered.add(itemId);
+    const card = document.getElementById('item-' + itemId);
+    if (card) card.classList.add('item-answered');
+    document.getElementById('answered-count').textContent = answered.size;
+  }
+
+  // On load, mark already-answered items from this section
+  sectionItems.forEach(id => {
+    const checked = document.querySelector(`input[name="${id}"]:checked`);
+    if (checked) markAnswered(id);
+  });
+
+  // Scroll to first unanswered item on load
+  window.addEventListener('DOMContentLoaded', () => {
+    const first = sectionItems.find(id => !answered.has(id));
+    if (first) {
+      const el = document.getElementById('item-' + first);
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Coach Dashboard · TOT{% endblock %}
+
+{% block content %}
+<div class="coach-wrap">
+  <div class="coach-header">
+    <h1>Coach Dashboard</h1>
+    <div class="coach-stats">
+      <div class="stat-card">
+        <div class="stat-val">{{ stats.total }}</div>
+        <div class="stat-key">Total Profiles</div>
+      </div>
+      {% for z in stats.zones[:3] %}
+      <div class="stat-card">
+        <div class="stat-val">{{ z.n }}</div>
+        <div class="stat-key">{{ z.zone.split(': ')[-1] if ': ' in z.zone else z.zone }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if stats.zones %}
+  <section class="coach-section">
+    <h2>Zone Distribution</h2>
+    <div class="zone-dist-grid">
+      {% for z in stats.zones %}
+      <div class="zone-dist-card">
+        <div class="zone-dist-name">{{ z.zone.split(': ')[-1] if ': ' in z.zone else z.zone }}</div>
+        <div class="zone-dist-bar">
+          <div class="zone-dist-fill" style="width: {{ ((z.n / stats.total) * 100) | round }}%"></div>
+        </div>
+        <div class="zone-dist-n">{{ z.n }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="coach-section">
+    <h2>All Profiles</h2>
+    {% if profiles %}
+    <div class="profiles-table-wrap">
+      <table class="profiles-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Zone</th>
+            <th>Subtype</th>
+            <th>Shape (p)</th>
+            <th>Capture</th>
+            <th>Stamp</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in profiles %}
+          <tr>
+            <td class="id-cell">{{ p.session_id[:8].upper() }}</td>
+            <td>{{ p.created_at[:10] }}</td>
+            <td>
+              <span class="zone-badge">{{ p.zone.split(': ')[-1] if ': ' in p.zone else p.zone }}</span>
+            </td>
+            <td class="subtype-cell">{{ p.subtype }}</td>
+            <td class="mono">{{ "%.3f" | format(p.shape_parameter) }}</td>
+            <td class="capture-cell {% if p.capture_type != 'No Capture' %}capture-alert{% endif %}">
+              {{ p.capture_type.replace(' Capture', '') if p.capture_type else '—' }}
+            </td>
+            <td class="stamp-cell {% if p.primary_stamp and p.primary_stamp != 'None' %}stamp-alert{% endif %}">
+              {{ p.primary_stamp if p.primary_stamp and p.primary_stamp != 'None' else '—' }}
+            </td>
+            <td>
+              <a href="/coach/client/{{ p.session_id }}" class="table-link">View →</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <p>No profiles yet. Share the assessment link with clients to get started.</p>
+      <a href="/assess/start" class="btn btn-ghost">Take Assessment</a>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

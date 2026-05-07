@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Coach Login · TOT{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>Coach Access</h1>
+    <p class="auth-sub">Enter your password to access the dashboard.</p>
+    {% if request.query_params.get('error') %}
+    <div class="auth-error">Incorrect password. Please try again.</div>
+    {% endif %}
+    <form method="post" action="/coach/login" class="auth-form">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" autofocus placeholder="Enter password" required />
+      <button type="submit" class="btn btn-primary" style="width:100%">Access Dashboard</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
