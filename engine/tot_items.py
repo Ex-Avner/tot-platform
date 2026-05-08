@@ -28,13 +28,13 @@ class AssessmentItem:
     reverse_coded: bool = False
 
 OHN_ITEMS = [
-    AssessmentItem("V01", "I sometimes feel contact with something foundational beneath everyday experience that I cannot fully name.", "Ohn", "Vertical"),
+    AssessmentItem("V01", "I sometimes feel contact with something foundational that underlies everyday experience.", "Ohn", "Vertical"),
     AssessmentItem("V02", "There are moments when everyday experience opens into something that feels deeper or more real.", "Ohn", "Vertical"),
     AssessmentItem("V03", "Questions about the nature of existence feel personally urgent to me, not just intellectually interesting.", "Ohn", "Vertical"),
     AssessmentItem("V04", "Silence and stillness feel nourishing rather than empty to me.", "Ohn", "Vertical"),
     AssessmentItem("V05", "I have had experiences of unusual depth or clarity that revealed something about the nature of reality itself.", "Ohn", "Vertical"),
     AssessmentItem("V06", "The word 'sacred' has personal meaning to me, whether or not I am religious.", "Ohn", "Vertical"),
-    AssessmentItem("V07", "I sometimes sense a ground or foundation beneath the surface of things, even if I cannot explain it.", "Ohn", "Vertical"),
+    AssessmentItem("V07", "There is a ground or foundation beneath the surface of ordinary experience that I return to directly, not just as an idea.", "Ohn", "Vertical"),
     AssessmentItem("V08", "Art, music, or the natural world can produce in me a feeling of contact with something that underlies all experience.", "Ohn", "Vertical"),
     AssessmentItem("V09", "I have direct experiences of meaningfulness that feel discovered rather than chosen, as if the meaning was already there.", "Ohn", "Vertical"),
 ]
@@ -54,13 +54,13 @@ HOC_ITEMS = [
 HIM_ITEMS = [
     AssessmentItem("H01", "I usually already know my position on something before hearing anyone else's view.", "Him", "Horizontal"),
     AssessmentItem("H02", "When my view conflicts with the people closest to me, I usually hold my position rather than adjusting.", "Him", "Horizontal"),
-    AssessmentItem("H03", "I need significant time alone to feel like myself.", "Him", "Horizontal"),
+    AssessmentItem("H03", "My sense of what is true about something does not depend on reaching agreement with others.", "Him", "Horizontal"),
     AssessmentItem("H04", "I notice that other people's opinions rarely change what I actually think, even when I understand their reasoning.", "Him", "Horizontal"),
     AssessmentItem("H05", "I would rather be right alone than wrong with the group.", "Him", "Horizontal"),
-    AssessmentItem("H06", "I protect my solitude even when others want more of my time.", "Him", "Horizontal"),
+    AssessmentItem("H06", "When the people around me converge on a conclusion I disagree with, I hold my own position rather than moving toward theirs.", "Him", "Horizontal"),
     AssessmentItem("H07", "My most important work happens in solitude.", "Him", "Horizontal"),
     AssessmentItem("H08", "In group settings, I often hold positions I do not share because the group would not understand them.", "Him", "Horizontal"),
-    AssessmentItem("H09", "I feel more like myself when alone than when with others.", "Him", "Horizontal"),
+    AssessmentItem("H09", "There is a way I see things that remains consistent regardless of who I am around.", "Him", "Horizontal"),
 ]
 
 ALLMEN_ITEMS = [
@@ -92,7 +92,7 @@ WILLBE_ITEMS = [
     AssessmentItem("T11", "I feel responsible to future generations I will never meet.", "Willbe", "Temporal"),
     AssessmentItem("T12", "I make present-day sacrifices specifically because of how things will be for people living decades from now.", "Willbe", "Temporal"),
     AssessmentItem("T13", "I orient my work toward what will be needed after I am gone.", "Willbe", "Temporal"),
-    AssessmentItem("T14", "The unborn have a legitimate claim on how present-day decisions are made.", "Willbe", "Temporal"),
+    AssessmentItem("T14", "When I make decisions today, I find myself factoring in what conditions I am handing to people who will be alive after I am gone.", "Willbe", "Temporal"),
     AssessmentItem("T15", "I plan beyond my own lifespan.", "Willbe", "Temporal"),
     AssessmentItem("T16", "What I am leaving behind motivates my choices today.", "Willbe", "Temporal"),
     AssessmentItem("T17", "I feel genuine obligation, not just concern, about problems that will mostly affect people who come after me.", "Willbe", "Temporal"),
@@ -103,25 +103,36 @@ INTEGRATION_ITEMS = [
     AssessmentItem("I01", "When I focus deeply on one important thing, everything else in my life tends to fall apart.", "Integration", "Integration", reverse_coded=True),
     AssessmentItem("I02", "When someone I care about is in distress, I can stay emotionally present without losing my own stability.", "Integration", "Integration"),
     AssessmentItem("I03", "Attending to the past and the future makes it hard for me to be present.", "Integration", "Integration", reverse_coded=True),
-    AssessmentItem("I04", "People close to me would say I stay relationally available even when I am deep in my work.", "Integration", "Integration"),
+    AssessmentItem("I04", "I remain present and available to the people I care about even when I am deep in demanding work.", "Integration", "Integration"),
     AssessmentItem("I05", "Pursuing depth in one area of my life requires me to sacrifice connection in another.", "Integration", "Integration", reverse_coded=True),
     AssessmentItem("I06", "Holding awareness of what matters most and handling daily logistics does not feel like it pulls me in two directions.", "Integration", "Integration"),
     AssessmentItem("I07", "Caring about the long term exhausts my capacity for dealing with the present.", "Integration", "Integration", reverse_coded=True),
     AssessmentItem("I08", "When I care deeply about something and am also holding relationships and thinking about the future, it feels sustainable rather than depleting.", "Integration", "Integration"),
     AssessmentItem("I09", "When one area of life demands my full attention, other areas necessarily collapse.", "Integration", "Integration", reverse_coded=True),
-    AssessmentItem("I10", "I can orient toward depth, connection, and obligation at the same time without feeling like I have to choose.", "Integration", "Integration"),
+    AssessmentItem("I10", "I can be genuinely present to multiple significant commitments at the same time without feeling that attending to one requires abandoning the others.", "Integration", "Integration"),
     AssessmentItem("I11", "Trying to maintain orientation on too many things at once causes me to lose all of them.", "Integration", "Integration", reverse_coded=True),
     AssessmentItem("I12", "I experience periods where depth, connection, and purpose feel aligned without effort.", "Integration", "Integration"),
 ]
 
+HOM_ITEMS = [
+    AssessmentItem("M01", "My model of how I work tends to incorporate new experiences rather than being significantly changed by them.", "HallOfMirrors", "Epistemic"),
+    AssessmentItem("M02", "When someone close to me describes my behavior in a way I disagree with, I typically have a more complete explanation of the situation already.", "HallOfMirrors", "Epistemic"),
+    AssessmentItem("M03", "My understanding of my own psychology has remained fundamentally the same even through major life changes.", "HallOfMirrors", "Epistemic"),
+    AssessmentItem("M04", "I can give a more accurate account of why I do what I do than most people around me can.", "HallOfMirrors", "Epistemic"),
+    AssessmentItem("M05", "I rarely encounter an experience of myself that my existing self-understanding cannot account for.", "HallOfMirrors", "Epistemic"),
+    AssessmentItem("M06", "The frameworks I use to understand my own experience tend to generate explanations for whatever I encounter.", "HallOfMirrors", "Epistemic"),
+]
+
 ALL_AXIS_ITEMS = OHN_ITEMS + HOC_ITEMS + HIM_ITEMS + ALLMEN_ITEMS + WASONCE_ITEMS + WILLBE_ITEMS
-ALL_ITEMS = ALL_AXIS_ITEMS + INTEGRATION_ITEMS
+ALL_ITEMS = ALL_AXIS_ITEMS + INTEGRATION_ITEMS + HOM_ITEMS
 
 def get_item_bank() -> List[AssessmentItem]: return ALL_ITEMS
 def get_axis_items() -> List[AssessmentItem]: return ALL_AXIS_ITEMS
 def get_integration_items() -> List[AssessmentItem]: return INTEGRATION_ITEMS
+def get_hom_items() -> List[AssessmentItem]: return HOM_ITEMS
 def get_item_pole_map() -> Dict[str, str]: return {item.id: item.pole for item in ALL_AXIS_ITEMS}
 def get_integration_item_ids() -> List[str]: return [item.id for item in INTEGRATION_ITEMS]
+def get_hom_item_ids() -> List[str]: return [item.id for item in HOM_ITEMS]
 def get_reverse_coded_ids() -> List[str]: return [item.id for item in INTEGRATION_ITEMS if item.reverse_coded]
 def get_randomized_order(seed=None) -> List[AssessmentItem]:
     import random
@@ -136,11 +147,18 @@ def get_axis_items_by_pole() -> Dict[str, List[AssessmentItem]]:
     return grouped
 
 CODEBOOK = """
-TRIAXIAL ORIENTATION THEORY — ASSESSMENT CODEBOOK v2.0
+TRIAXIAL ORIENTATION THEORY — ASSESSMENT CODEBOOK v2.1
 ========================================================
-INSTRUMENT: TOT Orientation Assessment v2.0 (66 items, 7-point Likert)
-ADMIN TIME: 8-12 minutes (rapid number entry)
-VERSION NOTES: Overhauled from v1.0. 28 items rewritten. Him subscale rebuilt.
+INSTRUMENT: TOT Orientation Assessment v2.1 (72 items, 7-point Likert)
+ADMIN TIME: 10-15 minutes
+VERSION NOTES: v2.1 revisions from v2.0:
+  - V01, V07: removed "cannot name/explain" qualifier (penalized articulable depth)
+  - H03, H06, H09: replaced introversion-confounded items with epistemic independence items
+  - T14: replaced political/legal language with behavioral future-orientation item
+  - I04: replaced third-party inference with first-person behavioral item
+  - I10: removed explicit axis terminology (theory contamination)
+  - Added HOM subscale (M01-M06): 6-item Interpretive Orientation scale
+    for Hall of Mirrors (9th formation) detection
 SCORING: See tot_engine.py compute_profile() for full pipeline.
 THEORY: Erickson, R. (2025). Triaxial Orientation Theory. Avner Media.
 STATUS: Pre-validation research instrument.

@@ -430,6 +430,7 @@ class TOTProfile:
     interior_volume: float = 0.0
     distance_from_center: float = 0.0
     distance_from_boundary: float = 0.0
+    hall_of_mirrors: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {
@@ -473,6 +474,7 @@ class TOTProfile:
             "interior_volume": round(self.interior_volume, 4),
             "distance_from_center": round(self.distance_from_center, 4),
             "distance_from_boundary": round(self.distance_from_boundary, 4),
+            "hall_of_mirrors": self.hall_of_mirrors,
         }
 
     def to_json(self) -> str:
@@ -497,6 +499,7 @@ class TOTEngine:
     CAPTURE_VERTEX_THRESHOLD = 0.25      # Proximity to vertex for capture detection
     CAPTURE_EDGE_THRESHOLD = 0.20        # Proximity to edge
     STAMP_DETECTION_THRESHOLD = 0.40     # Minimum score for stamp detection
+    HALL_OF_MIRRORS_THRESHOLD = 0.58     # Composite score to flag HoM
 
     def compute_axis_scores(self, poles: PoleScores) -> AxisScores:
         """Compute axis scores from raw pole scores."""
@@ -810,6 +813,88 @@ class TOTEngine:
         boundary_dist = pt_dist * (1.0 - norm_val ** (1.0/p))
         return round(boundary_dist, 4)
 
+    def detect_hall_of_mirrors(self, poles: PoleScores, axes: AxisScores,
+                                p_self_report: float, p_empirical: float,
+                                hom_scores: Optional[List[float]] = None) -> dict:
+        """
+        Detect Hall of Mirrors: self-referential recursive epistemic trap.
+
+        Geometrically distinct from all eight zones: position collapses toward
+        center not through genuine multi-axis integration (Zone VIII) but through
+        pole undifferentiation — no axis achieves real contact. The person
+        references all orientations without being genuinely captured by any.
+
+        Key diagnostic: self-reported integration capacity (p_self_report)
+        significantly exceeds empirically demonstrated capacity (p_empirical).
+        In genuine Zone VIII, both are high. In HoM, self-report is high but
+        empirical shape is flat — the person believes they hold everything
+        simultaneously because they reference everything through one recursive loop.
+
+        Components:
+          pole_undifferentiation: all poles near mid-range (0.5), no genuine contact
+          center_proximity: position vector near origin (not through balance but flatness)
+          integration_divergence: self-report p >> empirical p
+          epistemic_subscale: score on M01-M06 subscale (if provided)
+        """
+        pole_arr = poles.to_array()
+
+        # 1. Pole undifferentiation: are all poles mid-range?
+        # Formula: for each pole, score is 1.0 if pole=0.5, 0.0 if pole=0.0 or 1.0
+        mid_range = np.clip(1.0 - 2.0 * np.abs(pole_arr - 0.5), 0.0, 1.0)
+        undifferentiation = float(np.mean(mid_range))
+
+        # 2. Center proximity: position vector near origin
+        pos = axes.position_vector()
+        distance = float(np.linalg.norm(pos))
+        center_score = float(np.clip(1.0 - distance / 0.30, 0.0, 1.0))
+
+        # 3. Integration divergence: self-report meaningfully exceeds empirical
+        divergence = p_self_report - p_empirical
+        divergence_score = float(np.clip(divergence / 0.80, 0.0, 1.0))
+
+        # 4. Epistemic subscale (M01-M06): direct self-report of self-referential closure
+        subscale_score = 0.50  # neutral prior when not provided
+        if hom_scores:
+            subscale_score = float(np.mean(hom_scores))
+
+        # Weighted composite — subscale gets highest weight when available
+        if hom_scores:
+            composite = (
+                0.20 * undifferentiation +
+                0.20 * center_score +
+                0.20 * divergence_score +
+                0.40 * subscale_score
+            )
+        else:
+            composite = (
+                0.40 * undifferentiation +
+                0.30 * center_score +
+                0.30 * divergence_score
+            )
+
+        detected = composite > self.HALL_OF_MIRRORS_THRESHOLD
+
+        return {
+            "detected": detected,
+            "score": round(float(composite), 3),
+            "components": {
+                "pole_undifferentiation": round(float(undifferentiation), 3),
+                "center_proximity": round(float(center_score), 3),
+                "integration_divergence": round(float(divergence_score), 3),
+                "epistemic_subscale": round(float(subscale_score), 3),
+            },
+            "active_pole_count": int(np.sum(pole_arr > 0.60)),
+            "description": (
+                "Hall of Mirrors pattern detected. The position profile shows "
+                "epistemic self-enclosure: no axis achieves genuine pole contact, "
+                "yet integration is self-reported as high. This pattern reflects "
+                "orientation through recursive self-reference rather than direct "
+                "contact with depth, community, or temporal obligation."
+                if detected else
+                "Hall of Mirrors pattern not detected at current threshold."
+            ),
+        }
+
     def analyze_captures(self, poles: PoleScores, axes: AxisScores) -> CaptureAnalysis:
         """
         Analyze proximity to all 26 capture configurations:
@@ -933,6 +1018,7 @@ class TOTEngine:
 
     def compute_profile(self, poles: PoleScores,
                         integration_scores: Optional[List[float]] = None,
+                        hom_scores: Optional[List[float]] = None,
                         participant_id: str = "") -> TOTProfile:
         """
         Compute a complete TOT profile from pole scores and integration scores.
@@ -979,6 +1065,14 @@ class TOTEngine:
 
         # Capture analysis
         profile.capture = self.analyze_captures(poles, profile.axis_scores)
+
+        # Hall of Mirrors detection
+        profile.hall_of_mirrors = self.detect_hall_of_mirrors(
+            poles, profile.axis_scores,
+            p_self_report=p_self_report,
+            p_empirical=profile.geometry.p_empirical,
+            hom_scores=hom_scores,
+        )
 
         return profile
 

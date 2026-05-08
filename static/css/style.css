@@ -688,6 +688,54 @@ h1,h2,h3,h4 {
 }
 .auth-form input:focus { border-color: var(--accent); }
 
+/* ─── Hall of Mirrors ───────────────────────────────────────────────────────── */
+.hom-detected { border-color: rgba(239,68,68,0.4) !important; }
+.hom-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem;
+}
+.hom-card-active {
+  border-color: rgba(239,68,68,0.5);
+  background: rgba(239,68,68,0.04);
+}
+.hom-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.hom-flag {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ef4444;
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 999px;
+  padding: 0.25rem 0.9rem;
+}
+.hom-flag-clear {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(94,234,212,0.08);
+  border: 1px solid rgba(94,234,212,0.25);
+  border-radius: 999px;
+  padding: 0.25rem 0.9rem;
+}
+.hom-score { font-family: monospace; font-size: 0.85rem; color: var(--muted); }
+.hom-description { color: var(--muted); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.25rem; }
+.hom-components { display: flex; flex-direction: column; gap: 0.6rem; }
+.hom-comp { display: flex; align-items: center; gap: 0.75rem; }
+.hom-comp-label { font-size: 0.8rem; color: var(--muted); width: 200px; flex-shrink: 0; }
+.hom-comp-bar { flex: 1; height: 6px; background: var(--panel-alt); border-radius: 999px; overflow: hidden; }
+.hom-comp-fill { height: 100%; background: linear-gradient(90deg, #ef4444, #f97316); border-radius: 999px; }
+.hom-comp-val { font-family: monospace; font-size: 0.8rem; color: #ef4444; min-width: 40px; text-align: right; }
+
 /* ─── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .nav { padding: 0.75rem 1rem; }

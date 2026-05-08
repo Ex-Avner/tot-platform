@@ -178,6 +178,39 @@
     {% endif %}
   </section>
 
+  <!-- Hall of Mirrors -->
+  {% if profile.hall_of_mirrors %}
+  {% set hom = profile.hall_of_mirrors %}
+  <section class="results-section {% if hom.detected %}hom-detected{% endif %}">
+    <h2>9th Formation: Hall of Mirrors</h2>
+    <p class="results-section-sub">The Hall of Mirrors is not a zone within the octahedron but a collapse inward — orientation through recursive self-reference rather than direct contact with depth, community, or time.</p>
+    <div class="hom-card {% if hom.detected %}hom-card-active{% endif %}">
+      <div class="hom-status">
+        {% if hom.detected %}
+        <span class="hom-flag">Pattern Detected</span>
+        {% else %}
+        <span class="hom-flag-clear">Pattern Not Detected</span>
+        {% endif %}
+        <span class="hom-score">Score: {{ "%.3f" | format(hom.score) }} / 1.000 (threshold 0.580)</span>
+      </div>
+      <p class="hom-description">{{ hom.description }}</p>
+      {% if hom.components %}
+      <div class="hom-components">
+        {% for key, val in hom.components.items() %}
+        <div class="hom-comp">
+          <span class="hom-comp-label">{{ key | replace('_', ' ') | title }}</span>
+          <div class="hom-comp-bar">
+            <div class="hom-comp-fill" style="width: {{ (val * 100) | round }}%"></div>
+          </div>
+          <span class="hom-comp-val">{{ "%.3f" | format(val) }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
   <div class="results-footer-actions">
     <a href="/results/{{ session_id }}/pdf" class="btn btn-primary btn-lg">Download Full PDF Report</a>
     <a href="/assess/start" class="btn btn-ghost">Take Assessment Again</a>

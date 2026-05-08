@@ -23,8 +23,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 from engine.tot_engine import TOTEngine, TOTScorer
 from engine.tot_items import (
     get_item_bank, get_item_pole_map, get_integration_item_ids,
-    get_reverse_coded_ids, OHN_ITEMS, HOC_ITEMS, HIM_ITEMS,
-    ALLMEN_ITEMS, WASONCE_ITEMS, WILLBE_ITEMS, INTEGRATION_ITEMS
+    get_hom_item_ids, get_reverse_coded_ids, OHN_ITEMS, HOC_ITEMS, HIM_ITEMS,
+    ALLMEN_ITEMS, WASONCE_ITEMS, WILLBE_ITEMS, INTEGRATION_ITEMS, HOM_ITEMS
 )
 from database import TOTWebDB
 from report import generate_pdf_report
@@ -56,6 +56,7 @@ SECTIONS = [
     {"key": "wasonce",  "title": "Ancestral Past",   "subtitle": "Your relationship to what came before you",                     "questions": WASONCE_ITEMS},
     {"key": "willbe",   "title": "Unborn Future",    "subtitle": "Your relationship to what comes after you",                     "questions": WILLBE_ITEMS},
     {"key": "integration", "title": "Integration",  "subtitle": "How your orientations hold together under pressure",             "questions": INTEGRATION_ITEMS},
+    {"key": "hom",         "title": "Interpretive Orientation", "subtitle": "How you relate to your own understanding of yourself", "questions": HOM_ITEMS},
 ]
 
 
@@ -83,19 +84,24 @@ async def submit_assessment(request: Request, session_id: str):
     session = SESSIONS[session_id]
     responses = session["responses"]
 
-    if len(responses) < 60:
+    if len(responses) < 66:
         return templates.TemplateResponse("error.html", {
             "request": request,
-            "message": f"Assessment incomplete — {len(responses)}/66 items answered. Please go back and complete all sections.",
+            "message": f"Assessment incomplete — {len(responses)}/72 items answered. Please go back and complete all sections.",
         })
 
     item_pole_map = get_item_pole_map()
     integration_ids = get_integration_item_ids()
+    hom_ids = get_hom_item_ids()
     reverse_ids = get_reverse_coded_ids()
 
     poles = scorer.score_likert_responses(responses, item_pole_map)
     integration_scores = scorer.score_integration_items(responses, integration_ids, reverse_ids)
-    profile = engine.compute_profile(poles, integration_scores, participant_id=session_id)
+    hom_scores = [
+        (responses[iid] - 1) / 6.0
+        for iid in hom_ids if iid in responses
+    ]
+    profile = engine.compute_profile(poles, integration_scores, hom_scores=hom_scores, participant_id=session_id)
 
     profile_dict = profile.to_dict()
     db.save_profile(session_id, responses, profile_dict)
