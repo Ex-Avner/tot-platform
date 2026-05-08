@@ -6,7 +6,10 @@ services:
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: TOT_COACH_PASSWORD
-        generateValue: false
         value: avner2025
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: DATABASE_URL
+        value: postgresql://tot_db_user:toDdn0sELVxFcsyEZMXpJzQWdyRNeGhU@dpg-d7ujmtnlk1mc73afqoi0-a/tot_db
+      - key: ANTHROPIC_API_KEY
+        value: REPLACE_WITH_YOUR_KEY

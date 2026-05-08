@@ -15,6 +15,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
+import anthropic
 import uvicorn
 
 # Engine imports
@@ -243,6 +244,101 @@ async def coach_client(request: Request, session_id: str):
         "profile_json": json.dumps(profile),
         "coach_view": True,
     })
+
+
+def _build_profile_summary(profile: dict) -> str:
+    axes = profile.get("axis_scores", {})
+    geo = profile.get("geometry", {})
+    hom = profile.get("hall_of_mirrors", {})
+    poles = profile.get("pole_scores", {})
+
+    lines = [
+        f"Zone: {profile.get('zone', 'Unknown')}",
+        f"Primary Subtype: {profile.get('primary_subtype', '')} — {profile.get('subtype_description', '')}",
+        f"Shape Parameter: {profile.get('shape_parameter', 1.0):.3f} ({profile.get('shape_name', '')})",
+        f"",
+        f"Axis Scores:",
+        f"  Vertical (Depth ↔ Surface): {axes.get('vertical', 0):+.3f}",
+        f"  Horizontal (Singular ↔ Collective): {axes.get('horizontal', 0):+.3f}",
+        f"  Temporal Extension: {axes.get('temporal_extension', 0):.3f}",
+        f"  Temporal Balance (Past ↔ Future): {axes.get('temporal_balance', 0):+.3f}",
+        f"",
+        f"Pole Scores (0–1):",
+    ]
+    for pole, score in poles.items():
+        lines.append(f"  {pole}: {score:.3f}")
+
+    lines += [
+        f"",
+        f"Geometric Detail:",
+        f"  Weakest Axis: {geo.get('weakest_axis', '')}",
+        f"  Strongest Axis: {geo.get('strongest_axis', '')}",
+        f"  Axis Imbalance: {geo.get('axis_imbalance', 0):.3f}",
+        f"  Self-Reported Integration (p): {geo.get('p_self_report', 1.0):.3f}",
+        f"  Empirical Integration (p): {geo.get('p_empirical', 1.0):.3f}",
+        f"  Deformations: {', '.join(geo.get('deformations', [])) or 'None'}",
+        f"",
+        f"Capture: {profile.get('capture_type', 'None')} — {profile.get('capture_primary', '')}",
+        f"Primary Intergenerational Stamp: {profile.get('primary_stamp', 'None')}",
+        f"",
+        f"Hall of Mirrors (9th Formation): {'DETECTED' if hom.get('detected') else 'Not detected'} (score {hom.get('score', 0):.3f})",
+    ]
+    return "\n".join(lines)
+
+
+TOT_SYSTEM_PROMPT = """You are an interpreter of Triaxial Orientation Theory (TOT), a geometric psychometric framework developed by Ross Erickson. You are speaking directly with someone who has just completed the TOT assessment.
+
+TOT maps psychological orientation across three axes:
+- Vertical (Depth): Ohn pole (depth, ground of being, contact with what underlies experience) vs. Hoc pole (surface, immediate, practical, measurable)
+- Horizontal (Breath): Him pole (singular self, epistemic independence, holds its own position) vs. Allmen pole (collective other, community, genuinely changed by others)
+- Temporal (Obligation): Wasonce pole (ancestral past, inherited obligation, what came before) vs. Willbe pole (unborn future, obligation to what comes after)
+
+The shape parameter (Lp norm) describes integration capacity — how well the person holds multiple orientations simultaneously. Low p (below 1.0) indicates crisis geometry — contact with one axis collapses the others. High p (above 2.0) indicates genuine multi-axis capacity.
+
+The eight zones are positions within octahedral space. The Hall of Mirrors (9th formation) is NOT a zone — it is a collapse inward through self-referential epistemic closure. The person references all orientations through a recursive self-model without making genuine contact with any pole.
+
+Stamps are intergenerational geometric deformations — inherited patterns from previous generations that compress or fracture the octahedral space.
+
+Speak directly with this person. Be honest, specific, and personal — not clinical. Do not produce bullet point lists. Do not explain the theory abstractly unless they ask. Connect their orientation profile to the concrete patterns of an actual human life. When something in the profile is significant, name it plainly. Ask questions when you need to understand their situation better. You are not a therapist — you are someone who genuinely understands this framework and is willing to help them think about what it reveals about their path.
+
+This person's profile:
+{PROFILE_SUMMARY}"""
+
+
+@app.post("/results/{session_id}/chat")
+async def chat(request: Request, session_id: str):
+    profile_data = db.get_profile(session_id)
+    if not profile_data:
+        raise HTTPException(404, "Profile not found")
+
+    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    if not api_key or api_key == "REPLACE_WITH_YOUR_KEY":
+        async def no_key():
+            yield "Chat is not yet configured. The platform owner needs to add an Anthropic API key."
+        return StreamingResponse(no_key(), media_type="text/plain")
+
+    body = await request.json()
+    messages = body.get("messages", [])
+    if not messages:
+        raise HTTPException(400, "No messages provided")
+
+    profile = json.loads(profile_data["profile_json"])
+    summary = _build_profile_summary(profile)
+    system_prompt = TOT_SYSTEM_PROMPT.replace("{PROFILE_SUMMARY}", summary)
+
+    client = anthropic.Anthropic(api_key=api_key)
+
+    def stream_response():
+        with client.messages.stream(
+            model="claude-sonnet-4-6",
+            max_tokens=1024,
+            system=system_prompt,
+            messages=messages,
+        ) as stream:
+            for text in stream.text_stream:
+                yield text
+
+    return StreamingResponse(stream_response(), media_type="text/plain")
 
 
 if __name__ == "__main__":
