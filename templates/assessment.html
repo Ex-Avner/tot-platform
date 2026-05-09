@@ -2,6 +2,31 @@
 {% block title %}Assessment · Section {{ section_num }} of {{ total_sections }}{% endblock %}
 
 {% block content %}
+<div class="assess-layout">
+
+<!-- ═══ LEFT: Echoes of Coherence game panel ═══ -->
+<aside class="eoc-panel" id="eoc-panel">
+  <div class="eoc-panel-header">
+    <span class="eoc-panel-title">Echoes of Coherence</span>
+    <button class="eoc-toggle-btn" onclick="toggleEocPanel()" title="Hide game">✕</button>
+  </div>
+  <div class="eoc-canvas-wrap">
+    <canvas id="eoc-canvas" width="440" height="286"></canvas>
+    <div class="eoc-click-hint" id="eoc-hint">Click canvas to activate · WASD move · SPACE interact · R restart</div>
+  </div>
+  <div id="eoc-hud" class="eoc-hud"></div>
+  <div class="eoc-legend">
+    <span class="eoc-leg-item"><span class="eoc-swatch eoc-sw-stable"></span>Stable</span>
+    <span class="eoc-leg-item"><span class="eoc-swatch eoc-sw-flux"></span>Flux</span>
+    <span class="eoc-leg-item"><span class="eoc-swatch eoc-sw-chaos"></span>Chaos</span>
+    <span class="eoc-leg-item"><span class="eoc-swatch eoc-sw-void"></span>Void</span>
+    <span class="eoc-leg-item"><span class="eoc-swatch eoc-sw-landmark"></span>Shard</span>
+    <span class="eoc-leg-item"><span class="eoc-swatch eoc-sw-core"></span>Core</span>
+  </div>
+  <p class="eoc-goal">Goal: coherence ≥ 60% · collect 2 shards · reach the Core</p>
+</aside>
+
+<!-- ═══ RIGHT: Assessment ═══ -->
 <div class="assess-wrap">
 
   <!-- Progress bar -->
@@ -62,10 +87,30 @@
     </div>
 
   </form>
-</div>
+</div><!-- /.assess-wrap -->
+</div><!-- /.assess-layout -->
+
+<!-- Show-game button (visible when panel is hidden) -->
+<button class="eoc-show-btn" id="eoc-show-btn" onclick="toggleEocPanel()" style="display:none">▶ Show Game</button>
 {% endblock %}
 
 {% block scripts %}
+<script src="/static/js/echoes_mini.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    if (typeof window.initEchoes === 'function') {
+      window.initEchoes('eoc-canvas', 'eoc-hud');
+    }
+  });
+
+  function toggleEocPanel() {
+    const panel = document.getElementById('eoc-panel');
+    const showBtn = document.getElementById('eoc-show-btn');
+    const hidden = panel.style.display === 'none';
+    panel.style.display = hidden ? '' : 'none';
+    showBtn.style.display = hidden ? 'none' : '';
+  }
+</script>
 <script>
   const answered = new Set({{ existing_responses.keys() | list | tojson }});
   const sectionItems = {{ section.questions | map(attribute='id') | list | tojson }};
