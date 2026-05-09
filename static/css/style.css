@@ -962,6 +962,24 @@ h1,h2,h3,h4 {
   font-style: italic;
 }
 
+/* HUD internals */
+.eoc-stat-row { display: flex; gap: 0.5rem; }
+.eoc-stat { flex: 1; display: flex; align-items: center; gap: 0.3rem; }
+.eoc-label { font-size: 0.62rem; color: var(--muted); white-space: nowrap; min-width: 46px; }
+.eoc-bar { flex: 1; height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+.eoc-fill { height: 100%; border-radius: 3px; transition: width 0.2s; }
+.eoc-val { font-size: 0.62rem; color: var(--text); min-width: 24px; text-align: right; }
+.eoc-val-warn { color: #ef4444; font-weight: 700; }
+.eoc-mstar { display: flex; flex-direction: column; gap: 2px; margin-top: 0.25rem; }
+.eoc-mbar { display: flex; align-items: center; gap: 4px; }
+.eoc-mlabel { font-size: 0.58rem; color: var(--muted); width: 10px; flex-shrink: 0; }
+.eoc-mfill { height: 4px; border-radius: 2px; flex: 1; max-width: 100%; transition: width 0.25s; }
+.eoc-mval { font-size: 0.58rem; color: var(--muted); min-width: 26px; text-align: right; }
+.eoc-tags { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.25rem; }
+.eoc-tag { font-size: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--muted); }
+.eoc-tag-ok { border-color: var(--accent); color: var(--accent); }
+.eoc-msg { font-size: 0.63rem; color: var(--muted); margin-top: 0.2rem; font-style: italic; min-height: 1rem; }
+
 .eoc-show-btn {
   position: fixed;
   bottom: 1.5rem;
