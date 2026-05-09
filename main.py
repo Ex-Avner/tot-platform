@@ -16,6 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 import anthropic
+import resend
 import uvicorn
 
 # Engine imports
@@ -61,6 +62,45 @@ SECTIONS = [
 ]
 
 
+APP_URL = os.getenv("APP_URL", "")
+
+
+def _send_report_email(to_email: str, display_name: str, pdf_bytes: bytes, session_id: str) -> tuple:
+    api_key = os.getenv("RESEND_API_KEY", "")
+    if not api_key:
+        return False, "Email service not configured"
+    from_addr = os.getenv("REPORT_FROM_EMAIL", "TOT Research <onboarding@resend.dev>")
+    resend.api_key = api_key
+    name_line = f"Hello {display_name}," if display_name else "Hello,"
+    results_url = f"{APP_URL}/results/{session_id}" if APP_URL else ""
+    link_html = f'<p>View your interactive results online: <a href="{results_url}">{results_url}</a></p>' if results_url else ""
+    try:
+        resend.Emails.send({
+            "from": from_addr,
+            "to": [to_email],
+            "subject": f"Your TOT Orientation Profile",
+            "html": f"""
+                <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0b1021;color:#e8ecf5;padding:32px;border-radius:8px;">
+                  <h2 style="color:#5eead4;margin-top:0;">Triaxial Orientation Theory</h2>
+                  <p>{name_line}</p>
+                  <p>Your full Orientation Profile is attached as a PDF.</p>
+                  {link_html}
+                  <p style="color:#9fb0c5;font-size:12px;margin-top:40px;">
+                    Triaxial Orientation Theory — Ross Erickson / Avner Media<br>
+                    Pre-validation research instrument
+                  </p>
+                </div>
+            """,
+            "attachments": [{
+                "filename": f"TOT_Profile_{session_id[:8].upper()}.pdf",
+                "content": list(pdf_bytes),
+            }],
+        })
+        return True, "Sent"
+    except Exception as e:
+        return False, str(e)
+
+
 # ─── Home ─────────────────────────────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
@@ -68,13 +108,49 @@ async def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
 
+# ─── Consent ──────────────────────────────────────────────────────────────────
+
+@app.get("/assess/consent", response_class=HTMLResponse)
+async def consent_page(request: Request):
+    return templates.TemplateResponse("consent.html", {"request": request})
+
+
+@app.post("/assess/consent/start")
+async def consent_start(
+    request: Request,
+    display_name: str = Form(""),
+    email: str = Form(""),
+    consented: str = Form(""),
+):
+    if not consented:
+        return templates.TemplateResponse("consent.html", {
+            "request": request,
+            "error": "You must consent to proceed.",
+            "display_name": display_name,
+            "email": email,
+        })
+    if not display_name.strip():
+        return templates.TemplateResponse("consent.html", {
+            "request": request,
+            "error": "Please enter your name or initials.",
+            "email": email,
+        })
+    session_id = str(uuid.uuid4())
+    SESSIONS[session_id] = {
+        "responses": {},
+        "started_at": datetime.utcnow().isoformat(),
+        "display_name": display_name.strip(),
+        "email": email.strip(),
+        "consented": True,
+    }
+    return RedirectResponse(f"/assess/{session_id}/1", status_code=303)
+
+
 # ─── Assessment ───────────────────────────────────────────────────────────────
 
 @app.get("/assess/start")
 async def start_assessment():
-    session_id = str(uuid.uuid4())
-    SESSIONS[session_id] = {"responses": {}, "started_at": datetime.utcnow().isoformat()}
-    return RedirectResponse(f"/assess/{session_id}/1", status_code=303)
+    return RedirectResponse("/assess/consent", status_code=303)
 
 
 @app.get("/assess/{session_id}/submit", response_class=HTMLResponse)
@@ -105,9 +181,18 @@ async def submit_assessment(request: Request, session_id: str):
     profile = engine.compute_profile(poles, integration_scores, hom_scores=hom_scores, participant_id=session_id)
 
     profile_dict = profile.to_dict()
-    db.save_profile(session_id, responses, profile_dict)
+    display_name = session.get("display_name", "")
+    email = session.get("email", "")
 
+    db.save_profile(session_id, responses, profile_dict, display_name=display_name)
     del SESSIONS[session_id]
+
+    if email:
+        try:
+            pdf_bytes = generate_pdf_report(profile_dict, session_id, display_name=display_name)
+            _send_report_email(email, display_name, pdf_bytes, session_id)
+        except Exception:
+            pass
 
     return RedirectResponse(f"/results/{session_id}", status_code=303)
 
@@ -175,6 +260,22 @@ async def results(request: Request, session_id: str):
     })
 
 
+@app.post("/results/{session_id}/send-email")
+async def send_email_report(request: Request, session_id: str):
+    profile_data = db.get_profile(session_id)
+    if not profile_data:
+        raise HTTPException(404, "Profile not found")
+    body = await request.json()
+    email = (body.get("email") or "").strip()
+    if not email or "@" not in email:
+        return {"ok": False, "error": "Invalid email address"}
+    profile = json.loads(profile_data["profile_json"])
+    display_name = profile_data.get("display_name", "")
+    pdf_bytes = generate_pdf_report(profile, session_id, display_name=display_name)
+    ok, msg = _send_report_email(email, display_name, pdf_bytes, session_id)
+    return {"ok": ok, "error": "" if ok else msg}
+
+
 @app.get("/results/{session_id}/pdf")
 async def download_pdf(session_id: str):
     profile_data = db.get_profile(session_id)
@@ -182,7 +283,8 @@ async def download_pdf(session_id: str):
         raise HTTPException(404, "Profile not found")
 
     profile = json.loads(profile_data["profile_json"])
-    pdf_bytes = generate_pdf_report(profile, session_id)
+    display_name = profile_data.get("display_name", "")
+    pdf_bytes = generate_pdf_report(profile, session_id, display_name=display_name)
 
     return StreamingResponse(
         iter([pdf_bytes]),

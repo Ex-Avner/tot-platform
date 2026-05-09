@@ -211,9 +211,20 @@
   </section>
   {% endif %}
 
+  <!-- Email Report -->
+  <section class="results-section email-report-section">
+    <h2>Email Your Report</h2>
+    <p class="results-section-sub">Enter your email to receive the full PDF report. Your address is used only for delivery and is not linked to your results data.</p>
+    <div class="email-report-form">
+      <input type="email" id="report-email" class="email-report-input" placeholder="you@example.com">
+      <button class="btn btn-primary" id="email-report-btn" onclick="sendReport()">Send PDF</button>
+    </div>
+    <div id="email-report-status" class="email-report-status"></div>
+  </section>
+
   <div class="results-footer-actions">
-    <a href="/results/{{ session_id }}/pdf" class="btn btn-primary btn-lg">Download Full PDF Report</a>
-    <a href="/assess/start" class="btn btn-ghost">Take Assessment Again</a>
+    <a href="/results/{{ session_id }}/pdf" class="btn btn-primary btn-lg">Download PDF Report</a>
+    <a href="/assess/consent" class="btn btn-ghost">Take Assessment Again</a>
   </div>
 
 </div>
@@ -344,5 +355,41 @@ const profile = {{ profile_json | safe }};
   });
 })();
 
+async function sendReport() {
+  const email = document.getElementById("report-email").value.trim();
+  const status = document.getElementById("email-report-status");
+  const btn = document.getElementById("email-report-btn");
+  if (!email || !email.includes("@")) {
+    status.textContent = "Please enter a valid email address.";
+    status.className = "email-report-status email-status-error";
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+  status.textContent = "";
+  try {
+    const res = await fetch("/results/{{ session_id }}/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      status.textContent = "Report sent. Check your inbox.";
+      status.className = "email-report-status email-status-ok";
+      btn.textContent = "Sent ✓";
+    } else {
+      status.textContent = data.error || "Something went wrong. Try downloading the PDF directly.";
+      status.className = "email-report-status email-status-error";
+      btn.disabled = false;
+      btn.textContent = "Send PDF";
+    }
+  } catch {
+    status.textContent = "Request failed. Try downloading the PDF directly.";
+    status.className = "email-report-status email-status-error";
+    btn.disabled = false;
+    btn.textContent = "Send PDF";
+  }
+}
 </script>
 {% endblock %}

@@ -393,7 +393,7 @@ def _generate_narrative(profile: Dict) -> list:
 
 # ── PDF Builder ───────────────────────────────────────────────────────────────
 
-def generate_pdf_report(profile: Dict, session_id: str) -> bytes:
+def generate_pdf_report(profile: Dict, session_id: str, display_name: str = "") -> bytes:
     try:
         from reportlab.lib.pagesizes import letter
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -505,6 +505,8 @@ def generate_pdf_report(profile: Dict, session_id: str) -> bytes:
     # ── PAGE 1: Header + Plain-English Summary ────────────────────────────────
     story.append(Paragraph("Triaxial Orientation Theory", S_TITLE))
     story.append(Paragraph("Personal Orientation Profile", S_HEADER))
+    if display_name:
+        story.append(Paragraph(f"Prepared for: {display_name}", S_HEADER))
     story.append(Paragraph(
         f"Generated {datetime.utcnow().strftime('%B %d, %Y')} · ID: {session_id[:8].upper()}",
         S_HEADER

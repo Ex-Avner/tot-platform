@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Before You Begin · TOT Assessment{% endblock %}
+
+{% block content %}
+<div class="consent-wrap">
+
+  <div class="consent-header">
+    <div class="assess-step">Step 1 of 9</div>
+    <h1 class="consent-title">Before You Begin</h1>
+    <p class="consent-subtitle">This is a pre-validation research instrument. Please read the following before proceeding.</p>
+  </div>
+
+  <div class="consent-card">
+
+    <div class="consent-disclaimer">
+      <h2 class="consent-section-title">Research Consent & Data Notice</h2>
+      <p>The TOT Assessment is part of ongoing research into Triaxial Orientation Theory, developed by Ross Erickson / Avner Media. This instrument is currently in its pre-validation phase. Results are exploratory and not a clinical diagnosis.</p>
+
+      <ul class="consent-list">
+        <li>Your responses are stored <strong>anonymously</strong>. No name or email address is linked to your assessment data in research records.</li>
+        <li>Your anonymized orientation profile may be used in statistical analysis, academic research, and peer-reviewed publication.</li>
+        <li>If you choose to provide your email address, it will be used <strong>only</strong> to deliver your PDF report. It is not retained, linked to your results, or shared with any third party.</li>
+        <li>You may withdraw at any time by closing the browser. Incomplete sessions are not saved.</li>
+        <li>This instrument is not a substitute for clinical assessment or professional mental health services.</li>
+      </ul>
+    </div>
+
+    <hr class="consent-divider">
+
+    {% if error %}
+    <div class="consent-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="/assess/consent/start" class="consent-form">
+
+      <div class="consent-field">
+        <label for="display_name">Your name or initials <span class="consent-required">*</span></label>
+        <p class="consent-field-hint">Used to personalize your PDF report. Not linked to your data.</p>
+        <input
+          type="text"
+          id="display_name"
+          name="display_name"
+          placeholder="e.g. Ross E."
+          maxlength="60"
+          required
+          value="{{ display_name or '' }}"
+        >
+      </div>
+
+      <div class="consent-field">
+        <label for="email">Email address <span class="consent-optional">(optional)</span></label>
+        <p class="consent-field-hint">If provided, your full PDF report will be emailed to you when the assessment is complete. Not stored or linked to your results.</p>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="you@example.com"
+          value="{{ email or '' }}"
+        >
+      </div>
+
+      <div class="consent-check-wrap">
+        <label class="consent-check-label">
+          <input type="checkbox" name="consented" value="1" required>
+          <span>
+            I understand this is a pre-validation research instrument, and I consent to my
+            anonymized results being used for academic research and peer review.
+          </span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg consent-submit">
+        Begin Assessment <span class="btn-arrow">→</span>
+      </button>
+
+      <p class="consent-meta">72 items · 10–15 minutes · Full geometric profile</p>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

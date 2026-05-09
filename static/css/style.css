@@ -688,6 +688,42 @@ h1,h2,h3,h4 {
 }
 .auth-form input:focus { border-color: var(--accent); }
 
+/* ─── Consent ───────────────────────────────────────────────────────────────── */
+.consent-wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+.consent-header { text-align: center; margin-bottom: 2rem; }
+.consent-title { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--text); margin: 0.5rem 0; }
+.consent-subtitle { color: var(--muted); font-size: 1rem; margin: 0; }
+.consent-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; }
+.consent-section-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--accent); margin: 0 0 0.75rem; }
+.consent-disclaimer p { color: var(--muted); font-size: 0.93rem; line-height: 1.65; margin-bottom: 0.75rem; }
+.consent-list { color: var(--muted); font-size: 0.92rem; line-height: 1.7; padding-left: 1.25rem; margin: 0.5rem 0 0; }
+.consent-list li { margin-bottom: 0.4rem; }
+.consent-list strong { color: var(--text); }
+.consent-divider { border: none; border-top: 1px solid var(--border); margin: 1.75rem 0; }
+.consent-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.35); color: #ef4444; border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.92rem; }
+.consent-form { display: flex; flex-direction: column; gap: 1.25rem; }
+.consent-field { display: flex; flex-direction: column; gap: 0.3rem; }
+.consent-field label { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+.consent-field-hint { font-size: 0.82rem; color: var(--muted); margin: 0; }
+.consent-field input { padding: 0.7rem 0.9rem; background: var(--panel-alt); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 0.95rem; font-family: var(--font-sans); outline: none; transition: border-color 0.15s; }
+.consent-field input:focus { border-color: var(--accent); }
+.consent-required { color: #ef4444; }
+.consent-optional { color: var(--muted); font-weight: 400; font-size: 0.85em; }
+.consent-check-wrap { display: flex; align-items: flex-start; }
+.consent-check-label { display: flex; gap: 0.75rem; cursor: pointer; font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+.consent-check-label input[type="checkbox"] { margin-top: 0.2rem; flex-shrink: 0; accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+.consent-submit { align-self: flex-start; }
+.consent-meta { color: var(--muted); font-size: 0.82rem; margin: 0; }
+
+/* ─── Email Report ───────────────────────────────────────────────────────────── */
+.email-report-section { border-color: rgba(94,234,212,0.2) !important; }
+.email-report-form { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.email-report-input { flex: 1; min-width: 220px; padding: 0.65rem 0.9rem; background: var(--panel-alt); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 0.95rem; font-family: var(--font-sans); outline: none; transition: border-color 0.15s; }
+.email-report-input:focus { border-color: var(--accent); }
+.email-report-status { font-size: 0.88rem; margin-top: 0.5rem; }
+.email-status-ok { color: var(--accent); }
+.email-status-error { color: #ef4444; }
+
 /* ─── Hall of Mirrors ───────────────────────────────────────────────────────── */
 .hom-detected { border-color: rgba(239,68,68,0.4) !important; }
 .hom-card {

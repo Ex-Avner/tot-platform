@@ -72,11 +72,20 @@ class TOTWebDB:
                     temporal_extension REAL,
                     capture_type TEXT,
                     primary_stamp TEXT,
-                    label TEXT DEFAULT ''
+                    label TEXT DEFAULT '',
+                    display_name TEXT DEFAULT ''
                 )
             """)
+            # Migration: add display_name to existing tables
+            try:
+                if _USE_PG:
+                    cur.execute("ALTER TABLE profiles ADD COLUMN IF NOT EXISTS display_name TEXT DEFAULT ''")
+                else:
+                    cur.execute("ALTER TABLE profiles ADD COLUMN display_name TEXT DEFAULT ''")
+            except Exception:
+                pass
 
-    def save_profile(self, session_id: str, responses: Dict, profile: Dict):
+    def save_profile(self, session_id: str, responses: Dict, profile: Dict, display_name: str = ""):
         axes = profile.get("axis_scores", {})
         ph = self._ph
         params = (
@@ -92,6 +101,7 @@ class TOTWebDB:
             axes.get("temporal_extension", 0),
             profile.get("capture_type", ""),
             profile.get("primary_stamp", ""),
+            display_name,
         )
         with self._conn() as conn:
             cur = self._cursor(conn)
@@ -100,8 +110,8 @@ class TOTWebDB:
                     INSERT INTO profiles
                     (session_id, created_at, responses_json, profile_json,
                      zone, subtype, shape_parameter, vertical, horizontal,
-                     temporal_extension, capture_type, primary_stamp)
-                    VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
+                     temporal_extension, capture_type, primary_stamp, display_name)
+                    VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
                     ON CONFLICT (session_id) DO UPDATE SET
                       responses_json=EXCLUDED.responses_json,
                       profile_json=EXCLUDED.profile_json,
@@ -110,15 +120,16 @@ class TOTWebDB:
                       vertical=EXCLUDED.vertical, horizontal=EXCLUDED.horizontal,
                       temporal_extension=EXCLUDED.temporal_extension,
                       capture_type=EXCLUDED.capture_type,
-                      primary_stamp=EXCLUDED.primary_stamp
+                      primary_stamp=EXCLUDED.primary_stamp,
+                      display_name=EXCLUDED.display_name
                 """, params)
             else:
                 cur.execute(f"""
                     INSERT OR REPLACE INTO profiles
                     (session_id, created_at, responses_json, profile_json,
                      zone, subtype, shape_parameter, vertical, horizontal,
-                     temporal_extension, capture_type, primary_stamp)
-                    VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
+                     temporal_extension, capture_type, primary_stamp, display_name)
+                    VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
                 """, params)
 
     def get_profile(self, session_id: str) -> Optional[Dict]:

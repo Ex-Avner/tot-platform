@@ -13,3 +13,9 @@ services:
         value: postgresql://tot_db_user:toDdn0sELVxFcsyEZMXpJzQWdyRNeGhU@dpg-d7ujmtnlk1mc73afqoi0-a/tot_db
       - key: ANTHROPIC_API_KEY
         value: REPLACE_WITH_YOUR_KEY
+      - key: RESEND_API_KEY
+        value: REPLACE_WITH_YOUR_KEY
+      - key: REPORT_FROM_EMAIL
+        value: TOT Research <onboarding@resend.dev>
+      - key: APP_URL
+        value: REPLACE_WITH_YOUR_RENDER_URL
