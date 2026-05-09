@@ -211,24 +211,6 @@
   </section>
   {% endif %}
 
-  <!-- LLM Chat -->
-  <section class="results-section chat-section">
-    <h2>Talk to an Interpreter</h2>
-    <p class="results-section-sub">Ask what your profile reveals about your path, your patterns, or your life. This is not a chatbot — it reads your full geometric profile before responding.</p>
-
-    <div class="chat-window" id="chat-window">
-      <div class="chat-messages" id="chat-messages">
-        <div class="chat-msg chat-msg-assistant">
-          <div class="chat-bubble">I have your full profile in front of me — your zone, subtype, shape parameter, axis scores, stamps, and Hall of Mirrors result. What do you want to understand about it?</div>
-        </div>
-      </div>
-      <div class="chat-input-wrap">
-        <textarea id="chat-input" class="chat-input" placeholder="Type your question..." rows="2"></textarea>
-        <button class="btn btn-primary chat-send" id="chat-send" onclick="sendMessage()">Send</button>
-      </div>
-    </div>
-  </section>
-
   <div class="results-footer-actions">
     <a href="/results/{{ session_id }}/pdf" class="btn btn-primary btn-lg">Download Full PDF Report</a>
     <a href="/assess/start" class="btn btn-ghost">Take Assessment Again</a>
@@ -362,83 +344,5 @@ const profile = {{ profile_json | safe }};
   });
 })();
 
-// ── Chat ──────────────────────────────────────────────────────────────────────
-const SESSION_ID = "{{ session_id }}";
-const chatMessages = [];
-
-// Seed with assistant opener
-chatMessages.push({
-  role: "assistant",
-  content: "I have your full profile in front of me — your zone, subtype, shape parameter, axis scores, stamps, and Hall of Mirrors result. What do you want to understand about it?"
-});
-
-function appendMessage(role, text) {
-  const wrap = document.getElementById("chat-messages");
-  const div = document.createElement("div");
-  div.className = `chat-msg chat-msg-${role}`;
-  const bubble = document.createElement("div");
-  bubble.className = "chat-bubble";
-  bubble.textContent = text;
-  div.appendChild(bubble);
-  wrap.appendChild(div);
-  wrap.scrollTop = wrap.scrollHeight;
-  return bubble;
-}
-
-async function sendMessage() {
-  const input = document.getElementById("chat-input");
-  const btn = document.getElementById("chat-send");
-  const text = input.value.trim();
-  if (!text) return;
-
-  input.value = "";
-  input.disabled = true;
-  btn.disabled = true;
-  btn.textContent = "…";
-
-  appendMessage("user", text);
-  chatMessages.push({ role: "user", content: text });
-
-  const bubble = appendMessage("assistant", "");
-  bubble.classList.add("chat-streaming");
-
-  try {
-    const res = await fetch(`/results/${SESSION_ID}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: chatMessages }),
-    });
-
-    if (!res.ok) throw new Error("Request failed");
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let full = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      full += chunk;
-      bubble.textContent = full;
-      document.getElementById("chat-messages").scrollTop = 99999;
-    }
-
-    bubble.classList.remove("chat-streaming");
-    chatMessages.push({ role: "assistant", content: full });
-  } catch (e) {
-    bubble.textContent = "Something went wrong. Please try again.";
-    bubble.classList.remove("chat-streaming");
-  }
-
-  input.disabled = false;
-  btn.disabled = false;
-  btn.textContent = "Send";
-  input.focus();
-}
-
-document.getElementById("chat-input").addEventListener("keydown", e => {
-  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-});
 </script>
 {% endblock %}
